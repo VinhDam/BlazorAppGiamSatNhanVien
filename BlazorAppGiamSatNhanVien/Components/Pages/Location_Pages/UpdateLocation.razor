@@ -1,0 +1,61 @@
+﻿@inject ILocationRepository _locationRepository
+@inject IJSRuntime _JS
+
+<div class="modal fade" id="bsModalUpdateLocation" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Update Location Form</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="LocationForUpdate" FormName="ProductUpsertForm" OnValidSubmit="UpdateLocationConfirm">
+                    <DataAnnotationsValidator />
+                    <div class="px-3">
+                        <div class="py-2 col-12">
+                            <label for="Code">Mã số</label>
+                            <InputText @bind-Value="LocationForUpdate.Code" class="form-control" id="Code" />
+                            <ValidationMessage For="@(() => LocationForUpdate.Code)" />
+                        </div>
+                        <div class="py-2 col-12">
+                            <label for="Name">Tên vị trí</label>
+                            <InputText @bind-Value="LocationForUpdate.Name" class="form-control" id="Name" />
+                            <ValidationMessage For="@(() => LocationForUpdate.Name)" />
+                        </div>
+                        <div class="py-2 col-12">
+                            <label for="Description">Mô tả</label>
+                            <InputText @bind-Value="LocationForUpdate.Description" class="form-control" id="Description" />
+                            <ValidationMessage For="@(() => LocationForUpdate.Description)" />
+                        </div>
+                        <div class="py-2 d-flex gap-3">
+                            <label for="Status">Hoạt động</label>
+                            <InputCheckbox @bind-Value="LocationForUpdate.Status" class="form-check" id="Status" />
+                            <ValidationMessage For="@(() => LocationForUpdate.Status)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer gap-2">
+                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="UpdateLocationConfirm">Create</MudButton>
+                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled">Cancel</MudButton>
+                    </div>
+                </EditForm>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Location LocationForUpdate { get; set; } = new Location();
+    [Parameter]
+    public EventCallback LoadPage { get; set; }
+
+    public async Task UpdateLocationConfirm()
+    {
+        await _locationRepository.UpdateAsync(LocationForUpdate);
+        LocationForUpdate = new Location();
+        await _JS.InvokeVoidAsync("HideUpdateLocationModal");
+        await _JS.ToastrSuccess("Product Updated Successfully");
+        await LoadPage.InvokeAsync();
+    }
+}

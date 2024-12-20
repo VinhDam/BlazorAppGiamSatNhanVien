@@ -1,0 +1,54 @@
+﻿@inject IShiftRepository _shiftRepository
+@inject IJSRuntime _JS
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        Update Shift Form
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="ShiftForUpdate" FormName="ProductUpsertForm" OnValidSubmit="UpdateShiftConfirm">
+            <DataAnnotationsValidator />
+            <div class="px-3">
+                <div class="py-2 col-12">
+                    <label for="Code">Mã số</label>
+                    <InputText @bind-Value="ShiftForUpdate.Code" class="form-control" id="Code" />
+                    <ValidationMessage For="@(() => ShiftForUpdate.Code)" />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Tên vị trí</label>
+                    <InputText @bind-Value="ShiftForUpdate.Name" class="form-control" id="Name" />
+                    <ValidationMessage For="@(() => ShiftForUpdate.Name)" />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Description">Mô tả</label>
+                    <InputText @bind-Value="ShiftForUpdate.Description" class="form-control" id="Description" />
+                    <ValidationMessage For="@(() => ShiftForUpdate.Description)" />
+                </div>
+            </div>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="UpdateShiftConfirm">Create</MudButton>
+        <MudButton ButtonType="ButtonType.Button" Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public Shift ShiftForUpdate { get; set; } = new Shift();
+    [Parameter]
+    public EventCallback LoadPage { get; set; }
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    public async Task UpdateShiftConfirm()
+    {
+        await _shiftRepository.UpdateAsync(ShiftForUpdate);
+        ShiftForUpdate = new Shift();
+        MudDialog.Close();
+        Snackbar.Add("Shift Updated Successfully", Severity.Success);
+        await LoadPage.InvokeAsync();
+    }
+    private void Cancel() => MudDialog.Cancel();
+}

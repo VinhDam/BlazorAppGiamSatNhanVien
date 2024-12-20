@@ -1,0 +1,102 @@
+﻿@page "/danhmuc/location"
+@inject ILocationRepository _locationRepository
+@inject IJSRuntime _JS
+
+<h3>Danh sách phòng</h3>
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Surface"
+           OnClick="CreateLocation">
+    <MudIcon Icon="@Icons.Material.Filled.Add" Class="pe-1" /> Add New Location
+</MudButton>
+
+<MudTable Items="Locations"
+          Loading="IsProcessing"
+          HorizontalScrollbar="true"
+          Striped="true" Bordered="true"
+          Style="white-space: nowrap;" pa>
+    <HeaderContent>
+        <MudTh>Mã</MudTh>
+        <MudTh>Tên phòng ban</MudTh>
+        <MudTh>Mô tả</MudTh>
+        <MudTh>Trạng thái</MudTh>
+        <MudTh>Ngày tạo</MudTh>
+        <MudTh>Ngày cập nhật</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Description">@context.Description</MudTd>
+        <MudTd DataLabel="Status">@context.Status</MudTd>
+        <MudTd DataLabel="CreateDate">@context.CreateDate</MudTd>
+        <MudTd DataLabel="UpdateDate">@context.UpdateDate</MudTd>
+        <MudTd>
+            <div class="d-flex gap-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="()=>UpdateLocation(context.Id)">
+                    <MudIcon Icon="@Icons.Material.Rounded.Edit" Title="Edit" />
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="()=>DeleteLocation(context.Id)">
+                    <MudIcon Icon="@Icons.Material.Rounded.Delete" Title="Delete" />
+                </MudButton>
+            </div>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 25, 50, 75, 100 }"
+                       RowsPerPageString="Rows per page:"
+                       InfoFormat="{first_item}-{last_item} of {all_items}"
+                       HorizontalAlignment="HorizontalAlignment.Left" />
+    </PagerContent>
+</MudTable>
+
+@code {
+    public bool IsProcessing { get; set; } = true;
+    private IEnumerable<Location> Locations { get; set; } = new List<Location>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadLocations();
+        }
+    }
+
+    private async Task LoadLocations()
+    {
+        IsProcessing = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        Locations = await _locationRepository.GetAllAsync();
+        IsProcessing = false;
+        StateHasChanged();
+    }
+}
+
+<CreateLocation LoadPage="LoadLocations" />
+@code {
+    private async Task CreateLocation()
+    {
+        await _JS.InvokeVoidAsync("ShowCreateLocationModal");
+    }
+}
+
+<DeleteLocation LoadPage="LoadLocations" LocationForDelete="@LocationForDelete" />
+@code {
+    Location LocationForDelete = new Location();
+    private async Task DeleteLocation(int id)
+    {
+        LocationForDelete = await _locationRepository.GetAsync(id);
+        await _JS.InvokeVoidAsync("ShowDeleteLocationModal");
+    }
+}
+
+<UpdateLocation LoadPage="LoadLocations" LocationForUpdate="@LocationForUpdate" />
+@code {
+    Location LocationForUpdate = new Location();
+    private async Task UpdateLocation(int id)
+    {
+        LocationForUpdate = await _locationRepository.GetAsync(id);
+        await _JS.InvokeVoidAsync("ShowUpdateLocationModal");
+    }
+}

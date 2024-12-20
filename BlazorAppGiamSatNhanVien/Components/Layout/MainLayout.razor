@@ -1,0 +1,46 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudAppBar Elevation="1">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+</MudAppBar>
+<MudLayout>
+    <MudDrawer @bind-Open="@_open" Elevation="1">
+        <MudDrawerHeader/>
+        <MudNavMenu>
+            <MudNavLink Match="NavLinkMatch.All" Href="">Home</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/employee">Nhân viên</MudNavLink>
+            <MudNavGroup Title="Danh mục" Expanded="true">
+                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/department">Phòng ban</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/shift">Ca làm việc</MudNavLink>
+                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/location">Vị trí</MudNavLink>
+            </MudNavGroup>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent Class="px-5" Style="padding-top: var(--mud-appbar-height);">
+        @Body
+    </MudMainContent>
+</MudLayout>
+    
+
+
+
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    private bool _open = true;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+}

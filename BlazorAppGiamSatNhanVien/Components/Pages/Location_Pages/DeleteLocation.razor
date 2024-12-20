@@ -1,0 +1,66 @@
+﻿@inject ILocationRepository _locationRepository
+@inject IJSRuntime _JS
+
+<div class="modal fade" id="bsModalDeleteLocation" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Location Confirm</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="LocationForDelete" FormName="ProductUpsertForm" OnValidSubmit="DeleteLocationConfirm">
+                    <DataAnnotationsValidator />
+                    <div class="px-3">
+                        <div class="py-2 col-12">
+                            <label for="Code">Mã số</label>
+                            <InputText @bind-Value="LocationForDelete.Code" class="form-control" id="Code" disabled />
+                            <ValidationMessage For="@(() => LocationForDelete.Code)" />
+                        </div>
+                        <div class="py-2 col-12">
+                            <label for="Name">Tên vị trí</label>
+                            <InputText @bind-Value="LocationForDelete.Name" class="form-control" id="Name" disabled />
+                            <ValidationMessage For="@(() => LocationForDelete.Name)" />
+                        </div>
+                        <div class="py-2 col-12">
+                            <label for="Description">Mô tả</label>
+                            <InputText @bind-Value="LocationForDelete.Description" class="form-control" id="Description" disabled />
+                            <ValidationMessage For="@(() => LocationForDelete.Description)" />
+                        </div>
+                        <div class="py-2 d-flex gap-3">
+                            <label for="Status">Hoạt động</label>
+                            <InputCheckbox @bind-Value="LocationForDelete.Status" class="form-check" id="Status" />
+                            <ValidationMessage For="@(() => LocationForDelete.Status)" />
+                        </div>
+                        <div class="py-2 col-12">
+                            <label for="CreateDate">Ngày tạo</label>
+                            <InputDate @bind-Value="LocationForDelete.CreateDate" class="form-control" id="CreateDate" disabled />
+                            <ValidationMessage For="@(() => LocationForDelete.CreateDate)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer gap-2">
+                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="DeleteLocationConfirm">Create</MudButton>
+                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled">Cancel</MudButton>
+                    </div>
+                </EditForm>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Location LocationForDelete { get; set; } = new Location();
+    [Parameter]
+    public EventCallback LoadPage { get; set; }
+
+    public async Task DeleteLocationConfirm()
+    {
+        await _locationRepository.DeleteAsync(LocationForDelete.Id);
+        LocationForDelete = new Location();
+        await _JS.InvokeVoidAsync("HideDeleteLocationModal");
+        await _JS.ToastrSuccess("Product Deleted Successfully");
+        await LoadPage.InvokeAsync();
+    }
+}

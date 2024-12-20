@@ -1,0 +1,130 @@
+﻿@page "/danhmuc/employee"
+@inject IEmployeeRepository _employeeRepository
+@inject IDepartmentRepository _departmentRepository
+@inject IShiftRepository _shiftRepository
+@inject IJSRuntime _JS
+
+<MudDataGrid Items="Employees"
+             Loading="IsProcessing"
+             HorizontalScrollbar="true"
+             Striped="true" Bordered="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+             Hideable="true" QuickFilter="@_quickFilter" Dense="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6" Class="pe-3">Danh sách nhân viên</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Surface"
+                   OnClick="CreateEmployee">
+            <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />Thêm nhân viên
+        </MudButton>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString"
+                      Placeholder="Tìm kiếm"
+                      Adornment="Adornment.Start"
+                      Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0" />
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x=>x.Code" Title="Mã số" />
+        <PropertyColumn Property="x=>x.Name" Title="Họ tên" />
+        <PropertyColumn Property="x=>x.PhoneNumber" Title="Điện thoại" />
+        <PropertyColumn Property="x=>x.Email" Title="Email" />
+        <PropertyColumn Property="x=>x.CCCD" Title="CCCD" />
+        <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
+        <PropertyColumn Property="x=>x.Department.Name" Title="Phòng ban" />
+        <PropertyColumn Property="x=>x.Shift.Name" Title="Ca làm việc" />
+        <PropertyColumn Property="x=>x.Status" Title="Trạng thái" />
+        <PropertyColumn Property="x=>DateOnly.FromDateTime(x.CreateDate)" Title="Ngày Tạo" />
+        <PropertyColumn Property="x=>DateOnly.FromDateTime(x.UpdateDate)" Title="Ngày cập nhật" />
+        <TemplateColumn Title="Thao tác">
+            <CellTemplate>
+                <div class="d-flex gap-2">
+                    <MudIconButton Icon="@Icons.Material.Rounded.Edit" OnClick="()=>UpdateEmployee(context.Item.Id)" />
+                    <MudIconButton Icon="@Icons.Material.Rounded.Delete" OnClick="()=>DeleteEmployee(context.Item.Id)" />
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Employee" />
+    </PagerContent>
+</MudDataGrid>
+
+
+
+@code {
+    public bool IsProcessing { get; set; } = true;
+    private IEnumerable<Employee> Employees { get; set; } = new List<Employee>();
+    private IEnumerable<Department> Departments { get; set; } = new List<Department>();
+    private IEnumerable<Shift> Shifts { get; set; } = new List<Shift>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadEmployees();
+        }
+    }
+
+    private async Task LoadEmployees()
+    {
+        IsProcessing = true;
+        StateHasChanged();
+        await Task.Delay(1500);
+        Employees = await _employeeRepository.GetAllAsync();
+        Departments = await _departmentRepository.GetAllAsync();
+        Shifts = await _shiftRepository.GetAllAsync();
+        IsProcessing = false;
+        StateHasChanged();
+    }
+}
+
+<CreateEmployee LoadPage="LoadEmployees"
+                Departments="@Departments"
+                Shifts="@Shifts" />
+@code {
+    private async Task CreateEmployee()
+    {
+        await _JS.InvokeVoidAsync("ShowCreateEmployeeModal");
+    }
+}
+
+<DeleteEmployee LoadPage="LoadEmployees"
+                EmployeeForDelete="@EmployeeForDelete" />
+@code {
+    Employee EmployeeForDelete = new Employee();
+    private async Task DeleteEmployee(int id)
+    {
+        EmployeeForDelete = await _employeeRepository.GetAsync(id);
+        await _JS.InvokeVoidAsync("ShowDeleteEmployeeModal");
+    }
+}
+
+<UpdateEmployee LoadPage="LoadEmployees"
+                EmployeeForUpdate="@EmployeeForUpdate"
+                Departments="@Departments"
+                Shifts="@Shifts" />
+@code {
+    Employee EmployeeForUpdate = new Employee();
+    private async Task UpdateEmployee(int id)
+    {
+        EmployeeForUpdate = await _employeeRepository.GetAsync(id);
+        await _JS.InvokeVoidAsync("ShowUpdateEmployeeModal");
+    }
+}
+
+@code {
+    private string _searchString;
+    private Func<Employee, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if ($"{x.Code} {x.Name} {x.PhoneNumber} {x.Email} {x.CCCD} {x.Description} {x.Department.Name} {x.Shift.Name} {x.CreateDate} {x.UpdateDate}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+}
