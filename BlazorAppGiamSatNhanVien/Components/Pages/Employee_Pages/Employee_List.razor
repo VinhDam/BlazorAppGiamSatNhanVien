@@ -2,14 +2,14 @@
 @inject IEmployeeRepository _employeeRepository
 @inject IDepartmentRepository _departmentRepository
 @inject IShiftRepository _shiftRepository
+@inject IDialogService DialogService
 @inject IJSRuntime _JS
 
 <MudDataGrid Items="Employees"
              Loading="IsProcessing"
-             HorizontalScrollbar="true"
              Striped="true" Bordered="true"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
-             Hideable="true" QuickFilter="@_quickFilter" Dense="true">
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+             Hideable="true" QuickFilter="@_quickFilter" Dense="true" Style="white-space:nowrap">
     <ToolBarContent>
         <MudText Typo="Typo.h6" Class="pe-3">Danh sách nhân viên</MudText>
         <MudButton Variant="Variant.Filled"
@@ -81,37 +81,49 @@
     }
 }
 
-<CreateEmployee LoadPage="LoadEmployees"
-                Departments="@Departments"
-                Shifts="@Shifts" />
 @code {
     private async Task CreateEmployee()
     {
-        await _JS.InvokeVoidAsync("ShowCreateEmployeeModal");
+        var parameters = new DialogParameters<CreateEmployee>
+            {
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadEmployees),
+                ["Departments"] = Departments,
+                ["Shifts"] = Shifts
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<CreateEmployee>("", parameters, options);
     }
 }
 
-<DeleteEmployee LoadPage="LoadEmployees"
-                EmployeeForDelete="@EmployeeForDelete" />
 @code {
     Employee EmployeeForDelete = new Employee();
     private async Task DeleteEmployee(int id)
     {
         EmployeeForDelete = await _employeeRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowDeleteEmployeeModal");
+        var parameters = new DialogParameters<DeleteEmployee>
+            {
+                ["EmployeeForDelete"] = EmployeeForDelete,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadEmployees),
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<DeleteEmployee>("", parameters, options);
     }
 }
 
-<UpdateEmployee LoadPage="LoadEmployees"
-                EmployeeForUpdate="@EmployeeForUpdate"
-                Departments="@Departments"
-                Shifts="@Shifts" />
 @code {
     Employee EmployeeForUpdate = new Employee();
     private async Task UpdateEmployee(int id)
     {
         EmployeeForUpdate = await _employeeRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowUpdateEmployeeModal");
+        var parameters = new DialogParameters<UpdateEmployee>
+            {
+                ["EmployeeForUpdate"] = EmployeeForUpdate,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadEmployees),
+                ["Departments"] = Departments,
+                ["Shifts"] = Shifts
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<UpdateEmployee>("", parameters, options);
     }
 }
 

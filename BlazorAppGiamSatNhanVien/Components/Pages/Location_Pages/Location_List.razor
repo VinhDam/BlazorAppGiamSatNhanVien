@@ -1,54 +1,53 @@
 ﻿@page "/danhmuc/location"
 @inject ILocationRepository _locationRepository
+@inject IDialogService DialogService
 @inject IJSRuntime _JS
 
-<h3>Danh sách phòng</h3>
 
-<MudButton Variant="Variant.Filled"
-           Color="Color.Surface"
-           OnClick="CreateLocation">
-    <MudIcon Icon="@Icons.Material.Filled.Add" Class="pe-1" /> Add New Location
-</MudButton>
-
-<MudTable Items="Locations"
-          Loading="IsProcessing"
-          HorizontalScrollbar="true"
-          Striped="true" Bordered="true"
-          Style="white-space: nowrap;" pa>
-    <HeaderContent>
-        <MudTh>Mã</MudTh>
-        <MudTh>Tên phòng ban</MudTh>
-        <MudTh>Mô tả</MudTh>
-        <MudTh>Trạng thái</MudTh>
-        <MudTh>Ngày tạo</MudTh>
-        <MudTh>Ngày cập nhật</MudTh>
-        <MudTh>Thao tác</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Code">@context.Code</MudTd>
-        <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Description">@context.Description</MudTd>
-        <MudTd DataLabel="Status">@context.Status</MudTd>
-        <MudTd DataLabel="CreateDate">@context.CreateDate</MudTd>
-        <MudTd DataLabel="UpdateDate">@context.UpdateDate</MudTd>
-        <MudTd>
-            <div class="d-flex gap-2">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="()=>UpdateLocation(context.Id)">
-                    <MudIcon Icon="@Icons.Material.Rounded.Edit" Title="Edit" />
-                </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="()=>DeleteLocation(context.Id)">
-                    <MudIcon Icon="@Icons.Material.Rounded.Delete" Title="Delete" />
-                </MudButton>
-            </div>
-        </MudTd>
-    </RowTemplate>
+<MudDataGrid Items="Locations"
+             Loading="IsProcessing"
+             Striped="true" Bordered="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+             Hideable="true" QuickFilter="@_quickFilter" Dense="true" Style="white-space:nowrap">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6" Class="pe-3">Danh sách phòng</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Surface"
+                   OnClick="CreateLocation">
+            <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />Thêm phòng
+        </MudButton>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString"
+                      Placeholder="Tìm kiếm"
+                      Adornment="Adornment.Start"
+                      Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0" />
+    </ToolBarContent>
+    <Columns>
+        @if (!IsProcessing)
+        {
+            <PropertyColumn Property="x=>x.Code" Title="Mã số" />
+            <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true" />
+            <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
+            <PropertyColumn Property="x=>x.Status" Title="Trạng thái" />
+            <PropertyColumn Property="x=>DateOnly.FromDateTime(x.CreateDate)" Title="Ngày Tạo" Filterable="false" />
+            <PropertyColumn Property="x=>DateOnly.FromDateTime(x.UpdateDate)" Title="Ngày cập nhật" Filterable="false" />
+            <TemplateColumn Title="Thao tác" StickyRight="true">
+                <CellTemplate>
+                    <div class="d-flex gap-2">
+                        <MudIconButton Icon="@Icons.Material.Rounded.Edit" OnClick="()=>UpdateLocation(context.Item.Id)" />
+                        <MudIconButton Icon="@Icons.Material.Rounded.Delete" OnClick="()=>DeleteLocation(context.Item.Id)" />
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+        }
+    </Columns>
     <PagerContent>
-        <MudTablePager PageSizeOptions="new int[] { 25, 50, 75, 100 }"
-                       RowsPerPageString="Rows per page:"
-                       InfoFormat="{first_item}-{last_item} of {all_items}"
-                       HorizontalAlignment="HorizontalAlignment.Left" />
+        <MudDataGridPager T="Location" />
     </PagerContent>
-</MudTable>
+</MudDataGrid>
 
 @code {
     public bool IsProcessing { get; set; } = true;
@@ -73,30 +72,57 @@
     }
 }
 
-<CreateLocation LoadPage="LoadLocations" />
 @code {
     private async Task CreateLocation()
     {
-        await _JS.InvokeVoidAsync("ShowCreateLocationModal");
+        var parameters = new DialogParameters<CreateLocation>
+            {
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadLocations)
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<CreateLocation>("Simple Dialog", parameters, options);
     }
 }
 
-<DeleteLocation LoadPage="LoadLocations" LocationForDelete="@LocationForDelete" />
 @code {
     Location LocationForDelete = new Location();
     private async Task DeleteLocation(int id)
     {
         LocationForDelete = await _locationRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowDeleteLocationModal");
+        var parameters = new DialogParameters<DeleteLocation>
+            {
+                ["LocationForDelete"] = LocationForDelete,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadLocations)
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<DeleteLocation>("", parameters, options);
     }
 }
-
-<UpdateLocation LoadPage="LoadLocations" LocationForUpdate="@LocationForUpdate" />
 @code {
     Location LocationForUpdate = new Location();
     private async Task UpdateLocation(int id)
     {
         LocationForUpdate = await _locationRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowUpdateLocationModal");
+        var parameters = new DialogParameters<UpdateLocation>
+            {
+                ["LocationForUpdate"] = LocationForUpdate,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadLocations)
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<UpdateLocation>("", parameters, options);
     }
+}
+
+    @code {
+    private string _searchString;
+    private Func<Location, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if ($"{x.Code} {x.Name} {x.Description} {x.Status} {x.CreateDate} {x.UpdateDate}".Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
 }

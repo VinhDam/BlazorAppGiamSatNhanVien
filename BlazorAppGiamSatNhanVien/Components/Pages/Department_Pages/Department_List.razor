@@ -1,14 +1,14 @@
 ﻿@page "/danhmuc/department"
 @inject IDepartmentRepository _departmentRepository
 @inject ILocationRepository _locationRepository
+@inject IDialogService DialogService
 @inject IJSRuntime _JS
 
 <MudDataGrid Items="Departments"
              Loading="IsProcessing"
-             HorizontalScrollbar="true"
              Striped="true" Bordered="true"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
-             Hideable="true" QuickFilter="@_quickFilter" Dense="true">
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Ignore"
+             Hideable="true" QuickFilter="@_quickFilter" Dense="true" Style="white-space:nowrap">
     <ToolBarContent>
         <MudText Typo="Typo.h6" Class="pe-3">Danh sách phòng ban</MudText>
         <MudButton Variant="Variant.Filled"
@@ -72,34 +72,47 @@
     }
 }
 
-<CreateDepartment LoadPage="LoadDepartments" Locations="@Locations" />
 @code {
     private async Task CreateDepartment()
     {
-        await _JS.InvokeVoidAsync("ShowCreateDepartmentModal");
+        var parameters = new DialogParameters<CreateDepartment>
+            {
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadDepartments),
+                ["Locations"] = Locations
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<CreateDepartment>("", parameters, options);
     }
 }
 
-<DeleteDepartment LoadPage="LoadDepartments"
-                  DepartmentForDelete="@DepartmentForDelete" />
 @code {
     Department DepartmentForDelete = new Department();
     private async Task DeleteDepartment(int id)
     {
         DepartmentForDelete = await _departmentRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowDeleteDepartmentModal");
+        var parameters = new DialogParameters<DeleteDepartment>
+            {
+                ["DepartmentForDelete"] = DepartmentForDelete,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadDepartments),
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<DeleteDepartment>("", parameters, options);
     }
 }
 
-<UpdateDepartment LoadPage="LoadDepartments"
-                  DepartmentForUpdate="@DepartmentForUpdate"
-                  Locations="@Locations" />
 @code {
     Department DepartmentForUpdate = new Department();
     private async Task UpdateDepartment(int id)
     {
         DepartmentForUpdate = await _departmentRepository.GetAsync(id);
-        await _JS.InvokeVoidAsync("ShowUpdateDepartmentModal");
+        var parameters = new DialogParameters<UpdateDepartment>
+            {
+                ["DepartmentForUpdate"] = DepartmentForUpdate,
+                ["LoadPage"] = EventCallback.Factory.Create(this, LoadDepartments),
+                ["Locations"] = Locations
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
+        await DialogService.ShowAsync<UpdateDepartment>("", parameters, options);
     }
 }
 

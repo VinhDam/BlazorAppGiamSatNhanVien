@@ -3,15 +3,6 @@
 @inject IDialogService DialogService
 @inject IJSRuntime _JS
 
-<style>
-    .sticky-left {
-        position: sticky;
-        left: 0;
-        z-index: 1;
-        background-color: white;
-    }
-</style>
-
 <MudDataGrid Items="Shifts"
              Loading="IsProcessing"
              Striped="true" Bordered="true"
@@ -84,7 +75,7 @@
 @code {
     private async Task CreateShift()
     {
-        var parameters = new DialogParameters<DeleteShift>
+        var parameters = new DialogParameters<CreateShift>
             {
                 ["LoadPage"] = EventCallback.Factory.Create(this, LoadShifts)
             };
@@ -108,7 +99,6 @@
     }
 }
 
-<UpdateShift LoadPage="LoadShifts" ShiftForUpdate="@ShiftForUpdate" />
 @code {
     Shift ShiftForUpdate = new Shift();
     private async Task UpdateShift(int id)

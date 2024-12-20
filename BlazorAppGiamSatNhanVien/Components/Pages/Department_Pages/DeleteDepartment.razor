@@ -1,69 +1,54 @@
 ﻿@inject IDepartmentRepository _departmentRepository
+@inject ISnackbar Snackbar
 @inject IJSRuntime _JS
 
-<div class="modal fade" id="bsModalDeleteDepartment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg  modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Department Confirm</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<MudDialog>
+    <TitleContent>
+        Delete Department Confirm
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="DepartmentForDelete" FormName="LocationCreateForm" OnValidSubmit="DeleteDepartmentConfirm">
+            <DataAnnotationsValidator />
+            <div class="px-3">
+                <div class="py-2 col-12">
+                    <label for="Code">Mã số</label>
+                    <InputText @bind-Value="DepartmentForDelete.Code" class="form-control" id="Code" disabled/>
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Tên vị trí</label>
+                    <InputText @bind-Value="DepartmentForDelete.Name" class="form-control" id="Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Description">Mô tả</label>
+                    <InputText @bind-Value="DepartmentForDelete.Description" class="form-control" id="Description" disabled />
+                </div>
+                <div class="py-2 d-flex gap-3">
+                    <label for="Status">Hoạt động</label>
+                    <InputCheckbox @bind-Value="DepartmentForDelete.Status" class="form-check" id="Status" disabled />
+                </div>
+                <hr />
+                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Delete</MudButton>
+                <MudButton ButtonType="ButtonType.Button" Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
             </div>
-            <div class="modal-body">
-                <EditForm Model="DepartmentForDelete" FormName="ProductUpsertForm" OnValidSubmit="DeleteDepartmentConfirm">
-                    <DataAnnotationsValidator />
-                    <div class="px-3">
-                        <div class="py-2 col-12">
-                            <label for="Code">Mã số</label>
-                            <InputText @bind-Value="DepartmentForDelete.Code" class="form-control" id="Code" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Name">Tên vị trí</label>
-                            <InputText @bind-Value="DepartmentForDelete.Name" class="form-control" id="Name" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Description">Mô tả</label>
-                            <InputText @bind-Value="DepartmentForDelete.Description" class="form-control" id="Description" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Location">Vị trí</label>
-                            <InputText @bind-Value="DepartmentForDelete.Location.Name" class="form-control" id="Location" disabled />
-                        </div>
-                        <div class="py-2 d-flex gap-3">
-                            <label for="Status">Hoạt động</label>
-                            <InputCheckbox @bind-Value="DepartmentForDelete.Status" class="form-check" id="Status" />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="CreateDate">Ngày tạo</label>
-                            <InputDate @bind-Value="DepartmentForDelete.CreateDate" class="form-control" id="CreateDate" disabled />
-                        </div>
-                    </div>
-                    <div class="modal-footer gap-2">
-                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="DeleteDepartmentConfirm">Delete</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled">Cancel</MudButton>
-                    </div>
-                </EditForm>
-            </div>
-
-        </div>
-    </div>
-</div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 @code {
     [Parameter]
     public Department DepartmentForDelete { get; set; } = new Department();
     [Parameter]
     public EventCallback LoadPage { get; set; }
-    protected async override Task OnInitializedAsync()
-    {
-        DepartmentForDelete.Location = new Location();
-    }
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
 
     public async Task DeleteDepartmentConfirm()
     {
         await _departmentRepository.DeleteAsync(DepartmentForDelete.Id);
         DepartmentForDelete = new Department();
-        await _JS.InvokeVoidAsync("HideDeleteDepartmentModal");
-        await _JS.ToastrSuccess("Department Deleted Successfully");
+        MudDialog.Close();
+        Snackbar.Add("Location Updated Successfully", Severity.Success);
         await LoadPage.InvokeAsync();
     }
+    private void Cancel() => MudDialog.Cancel();
 }

@@ -1,59 +1,48 @@
 ﻿@inject IDepartmentRepository _departmentRepository
+@inject ISnackbar Snackbar
 @inject IJSRuntime _JS
 
-<div class="modal fade" id="bsModalUpdateDepartment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg  modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Update Department Form</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<MudDialog>
+    <TitleContent>
+        Create Department Form
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="DepartmentForUpdate" FormName="ProductCreateForm" OnValidSubmit="UpdateDepartmentConfirm">
+            <DataAnnotationsValidator />
+            <div class="px-3">
+                <div class="py-2 col-12">
+                    <label for="Code">Mã số</label>
+                    <InputText @bind-Value="DepartmentForUpdate.Code" class="form-control" id="Code" />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Tên vị trí</label>
+                    <InputText @bind-Value="DepartmentForUpdate.Name" class="form-control" id="Name" />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Description">Mô tả</label>
+                    <InputText @bind-Value="DepartmentForUpdate.Description" class="form-control" id="Description" />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="LocationId">Mô tả</label>
+                    <InputSelect @bind-Value="DepartmentForUpdate.LocationId" class="form-control" id="LocationId">
+                        <option value="" selected>--Chọn vị trí--</option>
+                        @foreach (var item in Locations)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="py-2 d-flex gap-3">
+                    <label for="Status">Hoạt động</label>
+                    <InputCheckbox @bind-Value="DepartmentForUpdate.Status" class="form-check" id="Status" />
+                </div>
             </div>
-            <div class="modal-body">
-                <EditForm Model="DepartmentForUpdate" FormName="ProductUpsertForm" OnValidSubmit="UpdateDepartmentConfirm">
-                    <DataAnnotationsValidator />
-                    <div class="px-3">
-                        <div class="py-2 col-12">
-                            <label for="Code">Mã số</label>
-                            <InputText @bind-Value="DepartmentForUpdate.Code" class="form-control" id="Code" />
-                            <ValidationMessage For="@(() => DepartmentForUpdate.Code)" />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Name">Tên vị trí</label>
-                            <InputText @bind-Value="DepartmentForUpdate.Name" class="form-control" id="Name" />
-                            <ValidationMessage For="@(() => DepartmentForUpdate.Name)" />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Description">Mô tả</label>
-                            <InputText @bind-Value="DepartmentForUpdate.Description" class="form-control" id="Description" />
-                            <ValidationMessage For="@(() => DepartmentForUpdate.Description)" />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="LocationId">Mô tả</label>
-                            <InputSelect @bind-Value="DepartmentForUpdate.LocationId" class="form-control" id="LocationId">
-                                <option value="" selected>--Chọn vị trí--</option>
-                                @foreach (var item in Locations)
-                                {
-                                    <option value="@item.Id">@item.Name</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="@(() => DepartmentForUpdate.LocationId)" />
-                        </div>
-                        <div class="py-2 d-flex gap-3">
-                            <label for="Status">Hoạt động</label>
-                            <InputCheckbox @bind-Value="DepartmentForUpdate.Status" class="form-check" id="Status" />
-                            <ValidationMessage For="@(() => DepartmentForUpdate.Status)" />
-                        </div>
-                    </div>
-                    <div class="modal-footer gap-2">
-                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="UpdateDepartmentConfirm">Update</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled">Cancel</MudButton>
-                    </div>
-                </EditForm>
-            </div>
-
-        </div>
-    </div>
-</div>
+            <hr />
+            <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Update</MudButton>
+            <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 @code {
     [Parameter]
@@ -62,13 +51,16 @@
     public IEnumerable<Location> Locations { get; set; } = new List<Location>();
     [Parameter]
     public EventCallback LoadPage { get; set; }
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
 
     public async Task UpdateDepartmentConfirm()
     {
         await _departmentRepository.UpdateAsync(DepartmentForUpdate);
         DepartmentForUpdate = new Department();
-        await _JS.InvokeVoidAsync("HideUpdateDepartmentModal");
-        await _JS.ToastrSuccess("Product Updated Successfully");
+        MudDialog.Close();
+        Snackbar.Add("Deparment Updated Successfully", Severity.Success);
         await LoadPage.InvokeAsync();
     }
+    private void Cancel() => MudDialog.Cancel();
 }

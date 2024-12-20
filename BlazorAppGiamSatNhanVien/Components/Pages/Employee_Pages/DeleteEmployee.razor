@@ -1,62 +1,71 @@
 ﻿@inject IEmployeeRepository _employeeRepository
+@inject ISnackbar Snackbar
 @inject IJSRuntime _JS
 
-<div class="modal fade" id="bsModalDeleteEmployee" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg  modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Employee Confirm</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<MudDialog>
+    <TitleContent>
+        Delete Employee Confirm
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="EmployeeForDelete" FormName="LocationCreateForm" OnValidSubmit="DeleteEmployeeConfirm">
+            <DataAnnotationsValidator />
+            <div class="px-3">
+                <div class="py-2 col-12">
+                    <label for="Code">Mã số</label>
+                    <InputText @bind-Value="EmployeeForDelete.Code" class="form-control" id="Code" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Tên vị trí</label>
+                    <InputText @bind-Value="EmployeeForDelete.Name" class="form-control" id="Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Điện thoại</label>
+                    <InputText @bind-Value="EmployeeForDelete.PhoneNumber" class="form-control" id="Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">Email</label>
+                    <InputText @bind-Value="EmployeeForDelete.Email" class="form-control" id="Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Name">CCCD</label>
+                    <InputText @bind-Value="EmployeeForDelete.CCCD" class="form-control" id="Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Description">Mô tả</label>
+                    <InputText @bind-Value="EmployeeForDelete.Description" class="form-control" id="Description" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Department.Name">Phòng ban</label>
+                    <InputText @bind-Value="EmployeeForDelete.Department.Name" class="form-control" id="Department.Name" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="Shift.Name">Ca làm việc</label>
+                    <InputText @bind-Value="EmployeeForDelete.Shift.Name" class="form-control" id="Shift.Name" disabled />
+                </div>
+                <div class="py-2 d-flex gap-3">
+                    <label for="Status">Hoạt động</label>
+                    <InputCheckbox @bind-Value="EmployeeForDelete.Status" class="form-check" id="Status" disabled />
+                </div>
+                <div class="py-2 col-12">
+                    <label for="CreateDate">Ngày tạo</label>
+                    <InputDate @bind-Value="EmployeeForDelete.CreateDate" class="form-control" id="CreateDate" disabled />
+                </div>
+                <hr />
+                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Delete</MudButton>
+                <MudButton ButtonType="ButtonType.Button" Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
             </div>
-            <div class="modal-body">
-                <EditForm Model="EmployeeForDelete" FormName="ProductUpsertForm" OnValidSubmit="DeleteEmployeeConfirm">
-                    <DataAnnotationsValidator />
-                    <div class="px-3">
-                        <div class="py-2 col-12">
-                            <label for="Code">Mã số</label>
-                            <InputText @bind-Value="EmployeeForDelete.Code" class="form-control" id="Code" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Name">Tên vị trí</label>
-                            <InputText @bind-Value="EmployeeForDelete.Name" class="form-control" id="Name" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Description">Mô tả</label>
-                            <InputText @bind-Value="EmployeeForDelete.Description" class="form-control" id="Description" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Location">Vị trí</label>
-                            <InputText @bind-Value="EmployeeForDelete.Department.Name" class="form-control" id="Location" disabled />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="Location">Vị trí</label>
-                            <InputText @bind-Value="EmployeeForDelete.Shift.Name" class="form-control" id="Location" disabled />
-                        </div>
-                        <div class="py-2 d-flex gap-3">
-                            <label for="Status">Hoạt động</label>
-                            <InputCheckbox @bind-Value="EmployeeForDelete.Status" class="form-check" id="Status" />
-                        </div>
-                        <div class="py-2 col-12">
-                            <label for="CreateDate">Ngày tạo</label>
-                            <InputDate @bind-Value="EmployeeForDelete.CreateDate" class="form-control" id="CreateDate" disabled />
-                        </div>
-                    </div>
-                    <div class="modal-footer gap-2">
-                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" OnClick="DeleteEmployeeConfirm">Create</MudButton>
-                        <MudButton ButtonType="ButtonType.Button" Color="Color.Warning" Variant="Variant.Filled">Cancel</MudButton>
-                   </div>
-                </EditForm>
-            </div>
-
-        </div>
-    </div>
-</div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 @code {
     [Parameter]
     public Employee EmployeeForDelete { get; set; } = new Employee();
     [Parameter]
     public EventCallback LoadPage { get; set; }
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
     protected async override Task OnInitializedAsync()
     {
         EmployeeForDelete.Department = new Department();
@@ -67,8 +76,9 @@
     {
         await _employeeRepository.DeleteAsync(EmployeeForDelete.Id);
         EmployeeForDelete = new Employee();
-        await _JS.InvokeVoidAsync("HideDeleteEmployeeModal");
-        await _JS.ToastrSuccess("Employee Deleted Successfully");
+        MudDialog.Close();
+        Snackbar.Add("Location Updated Successfully", Severity.Success);
         await LoadPage.InvokeAsync();
     }
+    private void Cancel() => MudDialog.Cancel();
 }
