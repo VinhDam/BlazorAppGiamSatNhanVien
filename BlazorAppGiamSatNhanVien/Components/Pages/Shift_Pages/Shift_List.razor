@@ -25,9 +25,10 @@
                       Class="mt-0" />
     </ToolBarContent>
     <Columns>
-        @if(!IsProcessing){
-            <PropertyColumn Property="x=>x.Code" Title="Mã số" />
+        @if (!IsProcessing)
+        {
             <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true" />
+            <PropertyColumn Property="x=>x.Code" Title="Mã số" />
             <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
             <PropertyColumn Property="x=>x.StartHour" Title="Giờ bắt đầu" />
             <PropertyColumn Property="x=>x.EndHour" Title="Giờ kết thúc" />
@@ -80,7 +81,7 @@
                 ["LoadPage"] = EventCallback.Factory.Create(this, LoadShifts)
             };
         var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true };
-        await DialogService.ShowAsync<CreateShift>("Simple Dialog",parameters, options);
+        await DialogService.ShowAsync<CreateShift>("Simple Dialog", parameters, options);
     }
 }
 

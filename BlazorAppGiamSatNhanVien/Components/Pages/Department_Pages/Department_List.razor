@@ -26,14 +26,14 @@
                       Class="mt-0" />
     </ToolBarContent>
     <Columns>
+        <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true"/>
         <PropertyColumn Property="x=>x.Code" Title="Mã số" />
-        <PropertyColumn Property="x=>x.Name" Title="Họ tên" />
         <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
         <PropertyColumn Property="x=>x.Location.Name" Title="Mô tả" />
         <PropertyColumn Property="x=>x.Status" Title="Trạng thái" />
         <PropertyColumn Property="x=>DateOnly.FromDateTime(x.CreateDate)" Title="Ngày Tạo" />
         <PropertyColumn Property="x=>DateOnly.FromDateTime(x.UpdateDate)" Title="Ngày cập nhật" />
-        <TemplateColumn Title="Thao tác">
+        <TemplateColumn Title="Thao tác" StickyRight="true">
             <CellTemplate>
                 <div class="d-flex gap-2">
                     <MudIconButton Icon="@Icons.Material.Rounded.Edit" OnClick="()=>UpdateDepartment(context.Item.Id)" />

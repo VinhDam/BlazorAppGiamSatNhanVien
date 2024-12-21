@@ -11,14 +11,14 @@
             <DataAnnotationsValidator />
             <div class="px-3">
                 <div class="py-2 col-12">
+                    <label for="Name">Ca làm việc</label>
+                    <InputText @bind-Value="Shift.Name" class="form-control" id="Name" />
+                    <ValidationMessage For="@(() => Shift.Name)" />
+                </div>
+                <div class="py-2 col-12">
                     <label for="Code">Mã số</label>
                     <InputText @bind-Value="Shift.Code" class="form-control" id="Code" />
                     <ValidationMessage For="@(() => Shift.Code)" />
-                </div>
-                <div class="py-2 col-12">
-                    <label for="Name">Tên vị trí</label>
-                    <InputText @bind-Value="Shift.Name" class="form-control" id="Name" />
-                    <ValidationMessage For="@(() => Shift.Name)" />
                 </div>
                 <div class="py-2 col-12">
                     <label for="Description">Mô tả</label>

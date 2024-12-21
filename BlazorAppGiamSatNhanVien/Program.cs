@@ -1,6 +1,8 @@
 using BlazorAppGiamSatNhanVien.Components;
 using BlazorAppGiamSatNhanVien.Components.Account;
 using BlazorAppGiamSatNhanVien.Data;
+using BlazorAppGiamSatNhanVien.DataProvider;
+using BlazorAppGiamSatNhanVien.DataProvider.IDataProvider;
 using BlazorAppGiamSatNhanVien.Repository;
 using BlazorAppGiamSatNhanVien.Repository.IRepository;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -26,7 +28,7 @@ namespace BlazorAppGiamSatNhanVien
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<ILocationRepository, LocationRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-
+            builder.Services.AddScoped<IBreadcrumbItemDataProvider, BreadcrumbItemDataProvider>();
 
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<IdentityUserAccessor>();
