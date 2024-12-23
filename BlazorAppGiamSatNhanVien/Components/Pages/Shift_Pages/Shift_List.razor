@@ -3,6 +3,8 @@
 @inject IDialogService DialogService
 @inject IJSRuntime _JS
 
+<PageTitle>Ca làm việc</PageTitle>
+
 <MudDataGrid Items="Shifts"
              Loading="IsProcessing"
              Striped="true" Bordered="true"
@@ -27,7 +29,7 @@
     <Columns>
         @if (!IsProcessing)
         {
-            <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true" />
+            <PropertyColumn Property="x=>x.Name" Title="Ca làm việc" StickyLeft="true" />
             <PropertyColumn Property="x=>x.Code" Title="Mã số" />
             <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
             <PropertyColumn Property="x=>x.StartHour" Title="Giờ bắt đầu" />

@@ -3,6 +3,7 @@
 @inject IDialogService DialogService
 @inject IJSRuntime _JS
 
+<PageTitle>Vị trí</PageTitle>
 
 <MudDataGrid Items="Locations"
              Loading="IsProcessing"
@@ -28,7 +29,7 @@
     <Columns>
         @if (!IsProcessing)
         {
-            <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true" />
+            <PropertyColumn Property="x=>x.Name" Title="Vị trí" StickyLeft="true" />
             <PropertyColumn Property="x=>x.Code" Title="Mã số" />
             <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
             <PropertyColumn Property="x=>x.Status" Title="Trạng thái" />

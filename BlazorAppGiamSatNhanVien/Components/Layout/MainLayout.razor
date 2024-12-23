@@ -17,11 +17,11 @@
     <AuthorizeView>
         <NotAuthorized>
             <MudButton Style="color:white;border-color:white;border-radius:20px;margin-right:5px"
-            Variant="Variant.Outlined">
+                       Variant="Variant.Outlined">
                 <MudIcon Icon="@Icons.Material.Filled.AppRegistration" />@registerString
             </MudButton>
             <MudButton Style="color:white;border-color:white;border-radius:20px"
-            Variant="Variant.Outlined">
+                       Variant="Variant.Outlined">
                 <MudIcon Icon="@Icons.Material.Filled.Login" />@loginString
             </MudButton>
         </NotAuthorized>
@@ -31,23 +31,26 @@
     <MudDrawer @bind-Open="@_open" Elevation="5" Variant="DrawerVariant.Responsive">
         <MudDrawerHeader Dense="true" />
         <MudNavMenu>
-            <MudTextField @bind-Value="_searchString" 
-            Immediate="true"
-            TextChanged="Search"
-            Variant="Variant.Filled"
-            Style="height: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);"
-            Clearable="true" />
-            @if (searchItems.Any())
-            {
-                foreach (var item in searchItems)
+            <MudTextField @bind-Value="_searchString"
+                          Immediate="true"
+                          TextChanged="Search"
+                          Variant="Variant.Filled"
+                          Style="height: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);"
+                          Clearable="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Search" Label="Tìm kiếm" />
+            <MudList T="UrlItemName">
+                @if (searchItems.Any())
                 {
-                    <MudNavLink Match="NavLinkMatch.All"
-                    Href="@item.Url">
-                        @item.VietName
-                    </MudNavLink>
+                    foreach (var item in searchItems)
+                    {
+                        <MudListItem Dense="true" Href="@item.Url">
+                            @item.VietName
+                        </MudListItem>
+                    }
+                    <hr />
                 }
-                <hr />
-            }
+            </MudList>
             <MudNavLink Match="NavLinkMatch.All" Href="" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
             <MudNavLink Match="NavLinkMatch.All" Href="employee" Icon="@Icons.Material.Filled.Person">Nhân viên</MudNavLink>
             <MudNavGroup Title="Danh mục" Expanded="false" Icon="@Icons.Material.Filled.Menu">
@@ -182,7 +185,7 @@
         else
         {
             searchItems = Items.Where(u => u.VietName.Contains(_searchString, StringComparison.OrdinalIgnoreCase) &&
-                                           u.IsActive==true).ToList();
-}
+                                           u.IsActive == true).ToList();
+        }
     }
 }

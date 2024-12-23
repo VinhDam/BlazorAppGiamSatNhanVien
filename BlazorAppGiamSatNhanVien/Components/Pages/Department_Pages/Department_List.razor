@@ -4,6 +4,8 @@
 @inject IDialogService DialogService
 @inject IJSRuntime _JS
 
+<PageTitle>Phòng ban</PageTitle>
+
 <MudDataGrid Items="Departments"
              Loading="IsProcessing"
              Striped="true" Bordered="true"
@@ -26,7 +28,7 @@
                       Class="mt-0" />
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x=>x.Name" Title="Họ tên" StickyLeft="true"/>
+        <PropertyColumn Property="x=>x.Name" Title="Phòng ban" StickyLeft="true"/>
         <PropertyColumn Property="x=>x.Code" Title="Mã số" />
         <PropertyColumn Property="x=>x.Description" Title="Mô tả" />
         <PropertyColumn Property="x=>x.Location.Name" Title="Mô tả" />
