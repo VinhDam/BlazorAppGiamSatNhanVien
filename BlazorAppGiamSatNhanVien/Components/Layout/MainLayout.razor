@@ -4,76 +4,93 @@
 @inject IBreadcrumbItemDataProvider breadcrumbItemDataProvider
 @implements IBrowserViewportObserver
 @implements IAsyncDisposable
+@inject AuthenticationStateProvider _authStateProvider
 
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudAppBar Elevation="0" Dense="true" Fixed="true" Color="Color.Info">
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-    <MudButton Href="" Variant="Variant.Text" Color="Color.Inherit">App quản lý nhân viên</MudButton>
-    <MudSpacer />
-    <AuthorizeView>
-        <NotAuthorized>
+<AuthorizeView Context="AuthContext">
+    <Authorized>
+        <MudAppBar Elevation="0" Dense="true" Fixed="true" Color="Color.Info">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            <MudButton Href="" Variant="Variant.Text" Color="Color.Inherit">App quản lý nhân viên</MudButton>
+            <MudSpacer />
             <MudButton Style="color:white;border-color:white;border-radius:20px;margin-right:5px"
-                       Variant="Variant.Outlined">
-                <MudIcon Icon="@Icons.Material.Filled.AppRegistration" />@registerString
+                       Variant="Variant.Outlined" Href="/account/manage">
+                <MudIcon Icon="@Icons.Material.Filled.Person" />@UserString
             </MudButton>
-            <MudButton Style="color:white;border-color:white;border-radius:20px"
-                       Variant="Variant.Outlined">
-                <MudIcon Icon="@Icons.Material.Filled.Login" />@loginString
-            </MudButton>
-        </NotAuthorized>
-    </AuthorizeView>
-</MudAppBar>
-<MudLayout>
-    <MudDrawer @bind-Open="@_open" Elevation="5" Variant="DrawerVariant.Responsive">
-        <MudDrawerHeader Dense="true" />
-        <MudNavMenu>
-            <MudTextField @bind-Value="_searchString"
-                          Immediate="true"
-                          TextChanged="Search"
-                          Variant="Variant.Filled"
-                          Style="height: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);"
-                          Clearable="true"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.Search" Label="Tìm kiếm" />
-            <MudList T="UrlItemName">
-                @if (searchItems.Any())
-                {
-                    foreach (var item in searchItems)
-                    {
-                        <MudListItem Dense="true" Href="@item.Url">
-                            @item.VietName
-                        </MudListItem>
-                    }
-                    <hr />
-                }
-            </MudList>
-            <MudNavLink Match="NavLinkMatch.All" Href="" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Href="employee" Icon="@Icons.Material.Filled.Person">Nhân viên</MudNavLink>
-            <MudNavGroup Title="Danh mục" Expanded="false" Icon="@Icons.Material.Filled.Menu">
-                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/department" Icon="@Icons.Material.Filled.Groups">Phòng ban</MudNavLink>
-                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/shift" Icon="@Icons.Material.Filled.AccessTime">Ca làm việc</MudNavLink>
-                <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/location" Icon="@Icons.Material.Filled.LocationOn">Vị trí</MudNavLink>
-            </MudNavGroup>
-        </MudNavMenu>
-    </MudDrawer>
-    <MudMainContent Style="padding-top: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);">
-        <MudToolBar Style="background-color:#ececec;" Dense="true">
-            <MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
-        </MudToolBar>
-        <div class="px-3">
+            <form action="Account/Logout" method="post">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                <MudButton Style="color:white;border-color:white;border-radius:20px"
+                           Variant="Variant.Outlined" ButtonType="ButtonType.Submit">
+                    <MudIcon Icon="@Icons.Material.Filled.Logout" />@logoutString
+                </MudButton>
+            </form>
+        </MudAppBar>
+        <MudLayout>
+            <MudDrawer @bind-Open="@_open" Elevation="5" Variant="DrawerVariant.Responsive">
+                <MudDrawerHeader Dense="true" />
+                <MudNavMenu>
+                    <MudTextField @bind-Value="_searchString"
+                                  Immediate="true"
+                                  TextChanged="Search"
+                                  Variant="Variant.Filled"
+                                  Style="height: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);"
+                                  Clearable="true"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" Label="Tìm kiếm" />
+                    <MudList T="UrlItemName">
+                        @if (searchItems.Any())
+                        {
+                            foreach (var item in searchItems)
+                            {
+                                <MudListItem Dense="true" Href="@item.Url">
+                                    @item.VietName
+                                </MudListItem>
+                            }
+                            <hr />
+                        }
+                    </MudList>
+                    <MudNavLink Match="NavLinkMatch.All" Href="" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+                    <MudNavLink Match="NavLinkMatch.All" Href="employee" Icon="@Icons.Material.Filled.Person">Nhân viên</MudNavLink>
+                    <MudNavGroup Title="Danh mục" Expanded="false" Icon="@Icons.Material.Filled.Menu">
+                        <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/department" Icon="@Icons.Material.Filled.Groups">Phòng ban</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/shift" Icon="@Icons.Material.Filled.AccessTime">Ca làm việc</MudNavLink>
+                        <MudNavLink Match="NavLinkMatch.All" Href="danhmuc/location" Icon="@Icons.Material.Filled.LocationOn">Vị trí</MudNavLink>
+                    </MudNavGroup>
+                </MudNavMenu>
+            </MudDrawer>
+            <MudMainContent Style="padding-top: calc(var(--mud-appbar-height) - var(--mud-appbar-height) / 4);">
+                <MudToolBar Style="background-color:#ececec;" Dense="true">
+                    <MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+                </MudToolBar>
+                <div class="px-3">
+                    @Body
+                </div>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        <div class="p-2">
             @Body
         </div>
-    </MudMainContent>
-</MudLayout>
+        <div class="w-100 justify-content-center d-flex">
+            Email: vinh@gmail.com <br />
+            Password: 123
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
 
 @code {
     private bool _open = true;
     private string? currentUrl;
-    private List<BreadcrumbItem> _items = new List<BreadcrumbItem>();
+    private List<MudBlazor.BreadcrumbItem> _items = new List<MudBlazor.BreadcrumbItem>();
     List<UrlItemName> Items = new List<UrlItemName>();
 
     protected override void OnInitialized()
@@ -81,9 +98,9 @@
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
         Items = breadcrumbItemDataProvider.GenerateBreadcrumbItemDataProviderItemDatas();
-        _items = new List<BreadcrumbItem>
+        _items = new List<MudBlazor.BreadcrumbItem>
             {
-                new BreadcrumbItem("Home", href: ""),
+                new MudBlazor.BreadcrumbItem("Home", href: ""),
             };
     }
 
@@ -108,9 +125,9 @@
     private void CreateBreadcrumb()
     {
         List<string> Urls = currentUrl.Split("/").ToList();
-        _items = new List<BreadcrumbItem>
+        _items = new List<MudBlazor.BreadcrumbItem>
             {
-                new BreadcrumbItem("Home", href: "/"),
+                new MudBlazor.BreadcrumbItem("Home", href: "/"),
             };
         if (Urls.Count > 0)
         {
@@ -120,7 +137,7 @@
                 {
                     if (UrlItem == item.EngName)
                     {
-                        _items.Add(new BreadcrumbItem(item.VietName, href: null, disabled: true));
+                        _items.Add(new MudBlazor.BreadcrumbItem(item.VietName, href: null, disabled: true));
                     }
                 }
             }
@@ -134,8 +151,8 @@
     private List<Breakpoint> _breakpointHistory = new();
     private Breakpoint _start;
 
-    string registerString { get; set; } = "";
-    string loginString { get; set; } = "";
+    string UserString { get; set; } = "";
+    string logoutString { get; set; } = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -157,19 +174,21 @@
             NotifyOnBreakpointOnly = true
         };
 
-    Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    async Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
     {
         if (browserViewportEventArgs.Breakpoint.ToString() == "Lg")
         {
-            registerString = "Register";
-            loginString = "Login";
+            var authstate = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authstate.User;
+            UserString = user.Identity.Name;
+            logoutString = "logout";
         }
         else
         {
-            registerString = string.Empty;
-            loginString = string.Empty;
+            UserString = string.Empty;
+            logoutString = string.Empty;
         }
-        return InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 }
 
